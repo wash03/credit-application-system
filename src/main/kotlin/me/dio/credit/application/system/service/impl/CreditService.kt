@@ -16,6 +16,11 @@ class CreditService(
 ) : ICreditService {
   override fun save(credit: Credit): Credit {
     this.validDayFirstInstallment(credit.dayFirstInstallment)
+
+    if (credit.numberOfInstallments > 48) {
+      throw BusinessException("Número de parcelas excede o limite máximo de 48")
+    }
+
     credit.apply {
       customer = customerService.findById(credit.customer?.id!!)
     }
@@ -37,9 +42,10 @@ class CreditService(
     }*/
   }
 
-  private fun validDayFirstInstallment(dayFirstInstallment: LocalDate): Boolean {
-    return if (dayFirstInstallment.isBefore(LocalDate.now().plusMonths(3))) true
-    else throw BusinessException("Invalid Date")
+  private fun validDayFirstInstallment(dayFirstInstallment: LocalDate) {
+    if (dayFirstInstallment.isBefore(LocalDate.now().plusMonths(3))) {
+      throw BusinessException("A data da primeira parcela deve ser no máximo 3 meses após o dia atual")
+    }
   }
 }
 
